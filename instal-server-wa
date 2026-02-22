@@ -1,0 +1,35 @@
+# ==============================
+# CLONE WA-GATEWAY
+# ==============================
+
+echo ""
+echo "Cloning WA-Gateway..."
+
+# Deteksi user asli (walaupun pakai sudo)
+if [ -n "$SUDO_USER" ]; then
+    DEPLOY_USER="$SUDO_USER"
+else
+    DEPLOY_USER="$(whoami)"
+fi
+
+cd /var/www
+
+if [ -d "/var/www/wa-gateway" ]; then
+    echo "Folder wa-gateway sudah ada, skip clone."
+else
+    git clone https://github.com/hardiagunadi/wa-gateway.git wa-gateway
+fi
+
+# Set ownership ke user asli + www-data
+chown -R $DEPLOY_USER:www-data /var/www/wa-gateway
+
+# Permission aman production (RW untuk owner & group)
+chmod -R 775 /var/www/wa-gateway
+
+# Pastikan user masuk group www-data
+usermod -aG www-data $DEPLOY_USER || true
+
+echo "WA-Gateway berhasil di-clone."
+echo "Owner     : $DEPLOY_USER"
+echo "Group     : www-data"
+echo "Directory : /var/www/wa-gateway"
